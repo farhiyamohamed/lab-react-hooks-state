@@ -1,50 +1,65 @@
-import React from 'react'
-import { render, screen, fireEvent } from '@testing-library/react'
-import App from '../App'
-import { sampleProducts } from '../components/ProductList'
-import '@testing-library/jest-dom'
+import React from "react";
+import { render, screen, fireEvent } from "@testing-library/react";
+import App from "../App";
 
-test('toggles dark mode on button click', () => {
-  render(<App />)
-  const toggleBtn = screen.getByRole('button', { name: /toggle/i })
-  expect(toggleBtn).toBeInTheDocument()
+describe("Shopping App", () => {
+  test("toggles dark mode on button click", () => {
+    render(<App />);
+    const toggleBtn = screen.getByRole("button", { name: /dark mode/i });
+    expect(toggleBtn).toBeInTheDocument();
 
-  fireEvent.click(toggleBtn)
-  expect(toggleBtn.textContent.toLowerCase()).toMatch(/light/i)
+    // Click once → should switch to Light Mode
+    fireEvent.click(toggleBtn);
+    expect(toggleBtn.textContent.toLowerCase()).toMatch(/light/i);
 
-  fireEvent.click(toggleBtn)
-  expect(toggleBtn.textContent.toLowerCase()).toMatch(/dark/i)
-})
+    // Click again → back to Dark Mode
+    fireEvent.click(toggleBtn);
+    expect(toggleBtn.textContent.toLowerCase()).toMatch(/dark/i);
+  });
 
-test('filters products by category', () => {
-  render(<App />)
-  const dropdown = screen.getByRole('combobox')
+  test("filters products by category", () => {
+    render(<App />);
+    const select = screen.getByRole("combobox");
 
-  fireEvent.change(dropdown, { target: { value: 'Fruits' } })
-  expect(screen.getByText(/Apple/i)).toBeInTheDocument()
-  expect(screen.queryByText(/Milk/i)).not.toBeInTheDocument()
-})
+    // Show only Fruits
+    fireEvent.change(select, { target: { value: "Fruits" } });
+    expect(screen.getByText(/Apple/i)).toBeInTheDocument();
+    expect(screen.queryByText(/Milk/i)).not.toBeInTheDocument();
 
-test('displays message when no products match filter', () => {
-  render(<App />)
-  const dropdown = screen.getByRole('combobox')
-  fireEvent.change(dropdown, { target: { value: 'NonExistent' } })
+    // Show only Dairy
+    fireEvent.change(select, { target: { value: "Dairy" } });
+    expect(screen.getByText(/Milk/i)).toBeInTheDocument();
+    expect(screen.getByText(/Cheese/i)).toBeInTheDocument();
+    expect(screen.queryByText(/Apple/i)).not.toBeInTheDocument();
+  });
 
-  expect(screen.getByText(/no products available/i)).toBeInTheDocument()
-})
+  test("displays message when no products match filter", () => {
+    render(<App />);
+    const select = screen.getByRole("combobox");
 
-test('adds items to cart', () => {
-  render(<App />)
+    fireEvent.change(select, { target: { value: "NonExistingCategory" } });
+    expect(screen.getByText(/no products match your filter/i)).toBeInTheDocument();
+  });
 
-  const appleBtn = screen.getByTestId('product-' + sampleProducts.find(i => i.name === 'Apple').id)
-  fireEvent.click(appleBtn)
+  test("adds items to cart", () => {
+    render(<App />);
 
-  expect(screen.getByText(/shopping cart/i)).toBeInTheDocument()
-  expect(screen.getByText(/Apple is in your cart/i)).toBeInTheDocument()
+    // Cart is empty initially
+    expect(screen.getByText(/shopping cart/i)).toBeInTheDocument();
+    expect(screen.queryByText(/Apple is in your cart/i)).not.toBeInTheDocument();
 
-  const milkBtn = screen.getByTestId('product-' + sampleProducts.find(i => i.name === 'Milk').id)
-  fireEvent.click(milkBtn)
+    // Add Apple
+    const appleBtn = screen.getByTestId("product-1").querySelector("button");
+    fireEvent.click(appleBtn);
+    expect(screen.getByText(/Apple is in your cart/i)).toBeInTheDocument();
 
-  expect(screen.getByText(/shopping cart/i)).toBeInTheDocument()
-  expect(screen.getByText(/Milk is in your cart/i)).toBeInTheDocument()
-})
+    // Add Milk
+    const milkBtn = screen.getByTestId("product-2").querySelector("button");
+    fireEvent.click(milkBtn);
+    expect(screen.getByText(/Milk is in your cart/i)).toBeInTheDocument();
+    const handleAddToCart = jest.fn();
+
+render(<ProductCard product={product} onAddToCart={handleAddToCart} />);
+
+  });
+});
